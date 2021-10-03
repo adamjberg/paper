@@ -43,18 +43,38 @@ document.addEventListener("DOMContentLoaded", function () {
   const btnEraser = document.getElementById("eraser");
   const btnPrevious = document.getElementById("previous");
   const btnNext = document.getElementById("next");
+  const btnSave = document.getElementById("save");
   const linkDownload = document.getElementById("downloadLnk");
 
-  btnPencil.addEventListener("click", function() {
+  btnPencil.addEventListener("click", function () {
     setActiveTool(PENICL);
-  })
+  });
 
   btnEraser.addEventListener("click", function () {
     setActiveTool(ERASER);
   });
 
+  btnSave.addEventListener("click", function () {
+    const base64String = canvas.toDataURL("image/jpeg", 0.8);
+
+    fetch(base64String)
+      .then(function (res) {
+        return res.blob();
+      })
+      .then(function (blob) {
+        const formData = new FormData();
+        const file = new File([blob], "drawing.jpg")
+        formData.append("drawing", file);
+
+        fetch("/api/drawings", {
+          method: "POST",
+          body: formData,
+        });
+      });
+  });
+
   function downloadImage() {
-    var dt = canvas.toDataURL("image/jpeg");
+    var dt = canvas.toDataURL("image/jpeg", 0.8);
     this.href = dt;
   }
   linkDownload.addEventListener("click", downloadImage, false);
@@ -64,11 +84,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const toolElements = [btnPencil, btnEraser];
     for (const el of toolElements) {
       el.setAttribute("class", "");
-    }    
+    }
 
-    const activeToolElement = activeTool === PENICL ?  btnPencil : btnEraser;
+    const activeToolElement = activeTool === PENICL ? btnPencil : btnEraser;
 
-    activeToolElement.setAttribute("class", "active")
+    activeToolElement.setAttribute("class", "active");
   }
 
   function draw(e) {
@@ -85,7 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const NAV_HEIGHT = 21;
     clientY -= NAV_HEIGHT;
-    
+
     ctx.lineCap = "round";
 
     switch (activeTool) {
