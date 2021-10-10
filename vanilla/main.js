@@ -56,10 +56,12 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  btnPrevious.addEventListener("click", async function () {
+  async function getDrawing(params) {
     let fetchUrl = "/api/drawings";
-    if (currentDrawingId) {
+    if (params.beforeId) {
       fetchUrl += "?beforeId=" + currentDrawingId;
+    } else if (params.afterId) {
+      fetchUrl += "?afterId=" + currentDrawingId;
     }
 
     try {
@@ -74,7 +76,15 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch (err) {
       alert(err.message);
     }
+  }
+
+  btnPrevious.addEventListener("click", async function () {
+    getDrawing({ beforeId: currentDrawingId });
   });
+
+  btnNext.addEventListener("click", function() {
+    getDrawing({ afterId: currentDrawingId });
+  })
 
   btnLogin.addEventListener("click", function () {
     const username = prompt("Username");

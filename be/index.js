@@ -105,6 +105,10 @@ app.get("/api/drawings", AuthRequiredMiddleware, async function(req, res, next) 
     type: "drawing",
   }
 
+  let sort = {
+    _id:  -1
+  }
+
   if (beforeId) {
     findOptions._id = {
       $lt: new ObjectId(beforeId)
@@ -113,9 +117,12 @@ app.get("/api/drawings", AuthRequiredMiddleware, async function(req, res, next) 
     findOptions._id = {
       $gt: new ObjectId(afterId)
     }
+    sort = {
+      _id: 1
+    }
   }
 
-  const drawings = await db.collection("notes").find(findOptions).sort({ createdAt: -1 }).limit(1).toArray();
+  const drawings = await db.collection("notes").find(findOptions).sort(sort).limit(1).toArray();
   if (!drawings.length) {
     return res.sendStatus(404)
   }
