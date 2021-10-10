@@ -47,6 +47,13 @@ document.addEventListener("DOMContentLoaded", function () {
   const btnLogin = document.getElementById("login");
   const linkDownload = document.getElementById("downloadLnk");
 
+  btnPrevious.addEventListener("click", async function () {
+    const res = await fetch("/api/drawings");
+    const jsonData = await res.json();
+    const drawing = jsonData.data;
+    console.log(drawing);
+  });
+
   btnLogin.addEventListener("click", function () {
     const username = prompt("Username");
     const password = prompt("Password");

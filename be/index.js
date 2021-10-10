@@ -98,10 +98,11 @@ app.post("/api/login", async function (req, res, next) {
 app.get("/api/drawings", AuthRequiredMiddleware, async function(req, res, next) {
   const { db, user } = req;
 
-  const drawing = await db.collection("notes").findOne({
+  const drawings = await db.collection("notes").find({
     user: new ObjectId(user),
     type: "drawing",
-  }).sort({ createdAt: -1 });
+  }).sort({ createdAt: -1 }).limit(1).toArray();
+  const drawing = drawings.length ? drawings[0] : null;
 
   return res.json({
     data: drawing
