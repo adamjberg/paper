@@ -40,6 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let activeTool = PENICL;
   let currentDrawingId = null;
 
+  const btnNew = document.getElementById("new");
   const btnPencil = document.getElementById("pencil");
   const btnEraser = document.getElementById("eraser");
   const btnPrevious = document.getElementById("previous");
@@ -47,6 +48,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const btnSave = document.getElementById("save");
   const btnLogin = document.getElementById("login");
   const linkDownload = document.getElementById("downloadLnk");
+
+  btnNew.addEventListener("click", function() {
+    currentDrawingId = null;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  })
 
   function loadImage(url) {
     return new Promise((r) => {
