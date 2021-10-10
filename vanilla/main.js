@@ -49,7 +49,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const linkDownload = document.getElementById("downloadLnk");
 
   function loadImage(url) {
-    return new Promise(r => { let i = new Image(); i.onload = (() => r(i)); i.src = url; });
+    return new Promise((r) => {
+      let i = new Image();
+      i.onload = () => r(i);
+      i.src = url;
+    });
   }
 
   btnPrevious.addEventListener("click", async function () {
@@ -57,14 +61,19 @@ document.addEventListener("DOMContentLoaded", function () {
     if (currentDrawingId) {
       fetchUrl += "?beforeId=" + currentDrawingId;
     }
-    const res = await fetch(fetchUrl);
-    const jsonData = await res.json();
-    const drawing = jsonData.data;
-    currentDrawingId = drawing._id;
-    const url = drawing.signedUrl;
 
-    let img = await loadImage(url);
-    ctx.drawImage(img, 0, 0);
+    try {
+      const res = await fetch(fetchUrl);
+      const jsonData = await res.json();
+      const drawing = jsonData.data;
+      currentDrawingId = drawing._id;
+      const url = drawing.signedUrl;
+
+      let img = await loadImage(url);
+      ctx.drawImage(img, 0, 0);
+    } catch (err) {
+      alert(err.message);
+    }
   });
 
   btnLogin.addEventListener("click", function () {
@@ -91,23 +100,21 @@ document.addEventListener("DOMContentLoaded", function () {
     setActiveTool(ERASER);
   });
 
-  btnSave.addEventListener("click", function () {
+  btnSave.addEventListener("click", async function () {
     const base64String = canvas.toDataURL("image/jpeg", 0.8);
 
-    fetch(base64String)
-      .then(function (res) {
-        return res.blob();
-      })
-      .then(function (blob) {
-        const formData = new FormData();
-        const file = new File([blob], "drawing.jpg");
-        formData.append("drawing", file);
+    const res = await fetch(base64String);
+    const blob = await res.blob();
+    const formData = new FormData();
+    const file = new File([blob], "drawing.jpg");
+    formData.append("drawing", file);
 
-        fetch("/api/drawings", {
-          method: "POST",
-          body: formData,
-        });
-      });
+    const postImageRes = await fetch("/api/drawings", {
+      method: "POST",
+      body: formData,
+    });
+    const jsonData = await postImageRes.json();
+    currentDrawingId = jsonData.data.insertedId;
   });
 
   function downloadImage() {

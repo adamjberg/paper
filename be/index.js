@@ -165,6 +165,7 @@ app.post("/api/drawings", AuthRequiredMiddleware, upload.single("drawing"), asyn
 
   return res.json({
     success: true,
+    data: drawing
   });
 });
 
