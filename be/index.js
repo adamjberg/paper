@@ -181,6 +181,6 @@ app.get("*", function(req, res, next) {
   res.sendFile(path.resolve("../vanilla/index.html"));
 })
 
-app.listen(3001, function () {
-  console.log("Server listening on port 3001.");
+app.listen(3003, function () {
+  console.log("Server listening on port 3003.");
 });
