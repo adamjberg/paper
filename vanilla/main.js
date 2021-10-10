@@ -44,7 +44,24 @@ document.addEventListener("DOMContentLoaded", function () {
   const btnPrevious = document.getElementById("previous");
   const btnNext = document.getElementById("next");
   const btnSave = document.getElementById("save");
+  const btnLogin = document.getElementById("login");
   const linkDownload = document.getElementById("downloadLnk");
+
+  btnLogin.addEventListener("click", function () {
+    const username = prompt("Username");
+    const password = prompt("Password");
+
+    fetch("/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username,
+        password,
+      }),
+    });
+  });
 
   btnPencil.addEventListener("click", function () {
     setActiveTool(PENICL);
@@ -63,7 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .then(function (blob) {
         const formData = new FormData();
-        const file = new File([blob], "drawing.jpg")
+        const file = new File([blob], "drawing.jpg");
         formData.append("drawing", file);
 
         fetch("/api/drawings", {
