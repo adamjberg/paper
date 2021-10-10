@@ -38,6 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const PENICL = "pencil";
   const ERASER = "eraser";
   let activeTool = PENICL;
+  let currentDrawingId = null;
 
   const btnPencil = document.getElementById("pencil");
   const btnEraser = document.getElementById("eraser");
@@ -52,9 +53,14 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   btnPrevious.addEventListener("click", async function () {
-    const res = await fetch("/api/drawings");
+    let fetchUrl = "/api/drawings";
+    if (currentDrawingId) {
+      fetchUrl += "?beforeId=" + currentDrawingId;
+    }
+    const res = await fetch(fetchUrl);
     const jsonData = await res.json();
     const drawing = jsonData.data;
+    currentDrawingId = drawing._id;
     const url = drawing.signedUrl;
 
     let img = await loadImage(url);

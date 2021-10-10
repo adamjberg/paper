@@ -98,12 +98,28 @@ app.post("/api/login", async function (req, res, next) {
 });
 
 app.get("/api/drawings", AuthRequiredMiddleware, async function(req, res, next) {
-  const { db, user } = req;
+  const { db, user, query: { beforeId, afterId } } = req;
 
-  const drawings = await db.collection("notes").find({
+  const findOptions = {
     user: new ObjectId(user),
     type: "drawing",
-  }).sort({ createdAt: -1 }).limit(1).toArray();
+  }
+
+  if (beforeId) {
+    findOptions._id = {
+      $lt: new ObjectId(beforeId)
+    }
+  } else if(afterId) {
+    findOptions._id = {
+      $gt: new ObjectId(afterId)
+    }
+  }
+
+  const drawings = await db.collection("notes").find(findOptions).sort({ createdAt: -1 }).limit(1).toArray();
+  if (!drawings.length) {
+    return res.sendStatus(404)
+  }
+
   const drawing = drawings.length ? drawings[0] : null;
 
   const signedUrlExpireSeconds = 60 * 5;
