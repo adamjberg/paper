@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import express from "express";
 import multer from "multer";
 import multerS3 from "multer-s3";
+import path from "path";
 import cookieParser from 'cookie-parser';
 import { DatabaseMiddleware } from "./middleware/DatabaseMiddleware.js";
 import { getEnv } from "./env.js";
@@ -94,6 +95,35 @@ app.post("/api/login", async function (req, res, next) {
   }
 });
 
+app.get("/api/drawings", AuthRequiredMiddleware, async function(req, res, next) {
+  const { db, user } = req;
+
+  const drawing = await db.collection("notes").findOne({
+    user: new ObjectId(user),
+    type: "drawing",
+  }).sort({ createdAt: -1 });
+
+  return res.json({
+    data: drawing
+  })
+});
+
+app.get("/api/drawings/:id", AuthRequiredMiddleware, async function(req, res, next) {
+  const { db, user, params: { id } } = req;
+
+
+  const findOptions = {
+    _id: new ObjectId(id),
+    user: new ObjectId(user),
+    type: "drawing",
+  }
+  const drawing = await db.collection("notes").findOne(findOptions);
+
+  return res.json({
+    data: drawing
+  })
+});
+
 app.post("/api/drawings", AuthRequiredMiddleware, upload.single("drawing"), async function (req, res, next) {
   const { db, user } = req;
   const drawing = await db.collection("notes").insertOne({
@@ -110,6 +140,9 @@ app.post("/api/drawings", AuthRequiredMiddleware, upload.single("drawing"), asyn
 });
 
 app.use(express.static("../vanilla"));
+app.get("*", function(req, res, next) {
+  res.sendFile(path.resolve("../vanilla/index.html"));
+})
 
 app.listen(3001, function () {
   console.log("Server listening on port 3001.");
