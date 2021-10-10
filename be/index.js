@@ -20,10 +20,12 @@ app.use(cookieParser());
 app.use(DatabaseMiddleware);
 app.use(AuthMiddleware);
 
+const BUCKET = "xyzdigital";
+
 const upload = multer({
   storage: multerS3({
     s3: s3,
-    bucket: "xyzdigital",
+    bucket: BUCKET,
     metadata: function (req, file, cb) {
       cb(null, { fieldName: file.fieldname });
     },
@@ -104,14 +106,23 @@ app.get("/api/drawings", AuthRequiredMiddleware, async function(req, res, next) 
   }).sort({ createdAt: -1 }).limit(1).toArray();
   const drawing = drawings.length ? drawings[0] : null;
 
+  const signedUrlExpireSeconds = 60 * 5;
+  const url = s3.getSignedUrl('getObject', {
+      Bucket: BUCKET,
+      Key: drawing.key,
+      Expires: signedUrlExpireSeconds
+  })
+
   return res.json({
-    data: drawing
+    data: {
+      ...drawing,
+      signedUrl: url
+    }
   })
 });
 
 app.get("/api/drawings/:id", AuthRequiredMiddleware, async function(req, res, next) {
   const { db, user, params: { id } } = req;
-
 
   const findOptions = {
     _id: new ObjectId(id),
@@ -130,6 +141,7 @@ app.post("/api/drawings", AuthRequiredMiddleware, upload.single("drawing"), asyn
   const drawing = await db.collection("notes").insertOne({
     user: new ObjectId(user),
     type: "drawing",
+    key: req.file.key,
     url: req.file.location,
     createdAt: new Date(),
     updatedAt: new Date()

@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   const rootElement = document.getElementById("root");
-  const canvas = createHiDPICanvas(window.innerWidth, window.innerHeight);
+  const canvas = createHiDPICanvas(window.innerWidth, window.innerHeight, 1);
   rootElement.appendChild(canvas);
   const ctx = canvas.getContext("2d");
 
@@ -47,11 +47,18 @@ document.addEventListener("DOMContentLoaded", function () {
   const btnLogin = document.getElementById("login");
   const linkDownload = document.getElementById("downloadLnk");
 
+  function loadImage(url) {
+    return new Promise(r => { let i = new Image(); i.onload = (() => r(i)); i.src = url; });
+  }
+
   btnPrevious.addEventListener("click", async function () {
     const res = await fetch("/api/drawings");
     const jsonData = await res.json();
     const drawing = jsonData.data;
-    console.log(drawing);
+    const url = drawing.signedUrl;
+
+    let img = await loadImage(url);
+    ctx.drawImage(img, 0, 0);
   });
 
   btnLogin.addEventListener("click", function () {
